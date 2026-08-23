@@ -59,6 +59,10 @@ FEATURES_DC = ["I1mean_a", "I1mean_b", "I1mean_c",
 FEATURES_PHYS = ["Z1_a", "Z1_b", "Z1_c", "Z2_a", "Z2_b", "Z2_c",
                  "Rest_a", "Rest_b", "Rest_c"]
 
+# fundamental phasor: magnitude and angle, referenced to V1_a
+FEATURES_FUND = ([f"{s}f_{p}" for s in ("V1", "I1", "V2", "I2") for p in "abc"]
+                 + [f"{s}ang_{p}" for s in ("V1", "I1", "V2", "I2") for p in "abc"])
+
 R_BANK_C = 160.0        # bank C sits on DG2's bus and is never varied
 
 TEST_FRACTION = 0.25
@@ -95,12 +99,21 @@ def prepare(df):
     #          approximate otherwise, because RMS magnitudes are being added as
     #          if in phase - good enough to hand a tree the right quantity.
     eps = 1e-9
+    have_phasors = all(c in df.columns for c in FEATURES_FUND)
     for ph in ("a", "b", "c"):
         df[f"Z1_{ph}"] = df[f"V1_{ph}"] / (df[f"I1_{ph}"] + eps)
         df[f"Z2_{ph}"] = df[f"V2_{ph}"] / (df[f"I2_{ph}"] + eps)
-        i_bankA = (df[f"I1_{ph}"] + df[f"I2_{ph}"]
-                   - df[f"V2_{ph}"] / R_BANK_C)
-        df[f"Rest_{ph}"] = df[f"V1_{ph}"] / (i_bankA + eps)
+        if have_phasors:
+            # exact: currents summed as phasors, which is the only way that
+            # holds once a fault puts them out of phase with each other
+            cx = lambda s: (df[f"{s}f_{ph}"]
+                            * np.exp(1j * np.deg2rad(df[f"{s}ang_{ph}"])))
+            i_bankA = cx("I1") + cx("I2") - cx("V2") / R_BANK_C
+            df[f"Rest_{ph}"] = (cx("V1") / (i_bankA + eps)).abs()
+        else:
+            i_bankA = (df[f"I1_{ph}"] + df[f"I2_{ph}"]
+                       - df[f"V2_{ph}"] / R_BANK_C)
+            df[f"Rest_{ph}"] = df[f"V1_{ph}"] / (i_bankA + eps)
     df[FEATURES_PHYS] = df[FEATURES_PHYS].replace([np.inf, -np.inf], np.nan)
     df[FEATURES_PHYS] = df[FEATURES_PHYS].clip(-1e4, 1e4).fillna(0.0)
     # one group per load setting - the unit that gets held out
@@ -189,16 +202,29 @@ def evaluate(df, features, label, cascade=False):
         print("\n  LOAD HEAD - per-phase resistance")
 
     load_metrics = {}
-    for tgt in ("R_a", "R_b", "R_c", "unbalance"):
+    Rpred = {}
+    for tgt in ("R_a", "R_b", "R_c"):
         y = df[tgt].to_numpy()
         reg = RandomForestRegressor(n_estimators=300, random_state=SEED,
                                     n_jobs=-1)
         reg.fit(Xtr, y[tr])
         p = reg.predict(Xte)
+        Rpred[tgt] = p
         mae, r2 = mean_absolute_error(y[te], p), r2_score(y[te], p)
-        unit = "%" if tgt == "unbalance" else "ohm"
-        print(f"    {tgt:10s} MAE {mae:7.3f} {unit:4s}   R2 {r2:6.3f}")
+        print(f"    {tgt:10s} MAE {mae:7.3f} ohm    R2 {r2:6.3f}")
         load_metrics[tgt] = {"mae": mae, "r2": r2}
+
+    # Unbalance is a function of the three resistances, so DERIVE it from the
+    # predicted values rather than fitting it as its own target. A tree cannot
+    # represent max|R - mean| / mean, and regressing it separately discards
+    # the accuracy already achieved on R_a / R_b / R_c.
+    P = np.column_stack([Rpred["R_a"], Rpred["R_b"], Rpred["R_c"]])
+    m = P.mean(axis=1)
+    upred = 100.0 * np.abs(P - m[:, None]).max(axis=1) / m
+    y = df["unbalance"].to_numpy()
+    mae, r2 = mean_absolute_error(y[te], upred), r2_score(y[te], upred)
+    print(f"    {'unbalance':10s} MAE {mae:7.3f} %      R2 {r2:6.3f}   (derived)")
+    load_metrics["unbalance"] = {"mae": mae, "r2": r2}
     out["load"] = load_metrics
 
     return out
@@ -230,9 +256,17 @@ def main():
             df, FEATURES_RMS + FEATURES_DC,
             "CASCADE - fault state fed into the load head", cascade=True)
 
-        results["physics"] = evaluate(
-            df, FEATURES_RMS + FEATURES_DC + FEATURES_PHYS,
-            "RMS + DC + PHYSICS-DERIVED (V/I ratios, bank A estimate)")
+        if all(c in df.columns for c in FEATURES_FUND):
+            results["fundamental"] = evaluate(
+                df, FEATURES_RMS + FEATURES_DC + FEATURES_FUND,
+                "RMS + DC + FUNDAMENTAL PHASOR")
+            results["physics"] = evaluate(
+                df, FEATURES_RMS + FEATURES_DC + FEATURES_FUND + FEATURES_PHYS,
+                "EVERYTHING (+ physics-derived bank A estimate)")
+        else:
+            results["physics"] = evaluate(
+                df, FEATURES_RMS + FEATURES_DC + FEATURES_PHYS,
+                "RMS + DC + PHYSICS-DERIVED")
 
         print(f"\n{'='*66}")
         print("  DOES THE CASCADE HELP THE LOAD HEAD?")

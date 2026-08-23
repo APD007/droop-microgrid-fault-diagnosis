@@ -30,6 +30,12 @@ SCHEMA_28 = (["run_id", "R_a", "R_b", "R_c"]
 EXTRA_6 = ["I1mean_a", "I1mean_b", "I1mean_c",
            "I2mean_a", "I2mean_b", "I2mean_c"]
 
+# fundamental phasor: magnitude and angle. Needed for the load task - the
+# resistance cannot be recovered under fault from magnitudes alone, because
+# the two inverters' currents must be summed as phasors.
+PHASOR_24 = ([f"{s}f_{p}" for s in ("V1", "I1", "V2", "I2") for p in "abc"]
+             + [f"{s}ang_{p}" for s in ("V1", "I1", "V2", "I2") for p in "abc"])
+
 DIAG = ["run_id", "f1", "f2", "P1", "P2", "Q1", "Q2", "wall_s", "ok"]
 
 # plausible ranges - anything outside these is flagged, not silently kept
@@ -73,7 +79,7 @@ def check(rows):
 
     nan_rows, oor = [], []
     for i, r in sorted(rows.items()):
-        for col in SCHEMA_28[16:] + EXTRA_6 + ["f1", "f2"]:
+        for col in SCHEMA_28[16:] + EXTRA_6 + PHASOR_24 + ["f1", "f2"]:
             try:
                 v = float(r[col])
             except (KeyError, ValueError, TypeError):
@@ -122,6 +128,7 @@ def main():
     print("writing:")
     write("dataset.csv", SCHEMA_28, rows)
     write("dataset_extended.csv", SCHEMA_28 + EXTRA_6, rows)
+    write("dataset_full.csv", SCHEMA_28 + EXTRA_6 + PHASOR_24, rows)
     write("diagnostics.csv", DIAG, rows)
 
     times = [float(r["wall_s"]) for r in rows.values() if r.get("wall_s")]

@@ -1,0 +1,135 @@
+project root: C:\Users\prasa\Projects\droop-microgrid-fault-diagnosis
+added scripts/ and model/ to the MATLAB path
+=== worker 4 of 4 ===
+    assigned 1176 runs, 0 already done, 1176 to do
+    accelerator cache: C:\Users\prasa\Projects\droop-microgrid-fault-diagnosis\cache_w4
+[Warning: Cannot find library called 'dspstat3'.  To use this library, install <a href="matlab:matlab.internal.addons.launchers.showExplorer('AO_MODEL_RP','identifier','DS')">DSP
+System Toolbox</a>.] 
+[> In powergui
+In powergui
+In powergui
+In Simulink.Simulation.internal.DesktopSimHelper
+In Simulink.Simulation.internal.DesktopSimHelper.sim
+In Simulink/SimulationInput/sim
+In run_sweep (line 99)] 
+      1/1176   run_id 148    20.9s  elapsed   0.4 min  eta 409.6 min
+     10/1176   run_id 157     4.3s  elapsed   1.0 min  eta 120.4 min
+     20/1176   run_id 167     4.3s  elapsed   1.8 min  eta 101.3 min
+     30/1176   run_id 177     4.3s  elapsed   2.5 min  eta  94.4 min
+     40/1176   run_id 187     4.3s  elapsed   3.2 min  eta  90.4 min
+     50/1176   run_id 344     4.4s  elapsed   3.9 min  eta  87.7 min
+     60/1176   run_id 354     4.8s  elapsed   4.6 min  eta  86.1 min
+     70/1176   run_id 364     4.1s  elapsed   5.4 min  eta  84.4 min
+     80/1176   run_id 374     4.0s  elapsed   6.0 min  eta  82.4 min
+     90/1176   run_id 384     4.2s  elapsed   6.8 min  eta  81.4 min
+    100/1176   run_id 541     4.1s  elapsed   7.5 min  eta  80.2 min
+    110/1176   run_id 551     6.6s  elapsed   8.2 min  eta  79.7 min
+    120/1176   run_id 561     5.9s  elapsed   9.3 min  eta  81.4 min
+    130/1176   run_id 571     6.1s  elapsed  10.3 min  eta  82.4 min
+    140/1176   run_id 581     5.7s  elapsed  11.2 min  eta  83.0 min
+    150/1176   run_id 738     5.5s  elapsed  12.4 min  eta  84.6 min
+    160/1176   run_id 748     5.8s  elapsed  13.3 min  eta  84.5 min
+    170/1176   run_id 758     5.7s  elapsed  14.3 min  eta  84.5 min
+    180/1176   run_id 768     5.7s  elapsed  15.3 min  eta  84.3 min
+    190/1176   run_id 778     6.1s  elapsed  16.2 min  eta  84.1 min
+    200/1176   run_id 935     6.2s  elapsed  17.2 min  eta  83.8 min
+    210/1176   run_id 945     6.2s  elapsed  18.2 min  eta  83.5 min
+    220/1176   run_id 955     5.8s  elapsed  19.2 min  eta  83.1 min
+    230/1176   run_id 965     5.7s  elapsed  20.1 min  eta  82.6 min
+    240/1176   run_id 975     5.8s  elapsed  21.1 min  eta  82.0 min
+    250/1176   run_id 1132    6.2s  elapsed  22.1 min  eta  81.5 min
+    260/1176   run_id 1142    5.8s  elapsed  23.0 min  eta  81.0 min
+    270/1176   run_id 1152    5.7s  elapsed  24.0 min  eta  80.4 min
+    280/1176   run_id 1162    5.5s  elapsed  25.0 min  eta  79.7 min
+    290/1176   run_id 1172    5.5s  elapsed  25.9 min  eta  79.0 min
+    300/1176   run_id 1329    5.6s  elapsed  26.8 min  eta  78.0 min
+    310/1176   run_id 1339    5.2s  elapsed  27.6 min  eta  77.1 min
+    320/1176   run_id 1349    5.2s  elapsed  28.5 min  eta  76.1 min
+    330/1176   run_id 1359    5.4s  elapsed  29.4 min  eta  75.2 min
+    340/1176   run_id 1369    5.3s  elapsed  30.3 min  eta  74.3 min
+    350/1176   run_id 1526    5.4s  elapsed  31.2 min  eta  73.5 min
+    360/1176   run_id 1536    4.8s  elapsed  32.0 min  eta  72.4 min
+    370/1176   run_id 1546    4.0s  elapsed  32.7 min  eta  71.1 min
+    380/1176   run_id 1556    4.0s  elapsed  33.4 min  eta  69.8 min
+    390/1176   run_id 1566    4.0s  elapsed  34.0 min  eta  68.5 min
+    400/1176   run_id 1723    3.9s  elapsed  34.7 min  eta  67.2 min
+    410/1176   run_id 1733    4.0s  elapsed  35.3 min  eta  65.9 min
+    420/1176   run_id 1743    4.0s  elapsed  36.0 min  eta  64.7 min
+    430/1176   run_id 1753    4.0s  elapsed  36.7 min  eta  63.5 min
+    440/1176   run_id 1763    4.1s  elapsed  37.3 min  eta  62.4 min
+    450/1176   run_id 1920    4.0s  elapsed  38.0 min  eta  61.2 min
+    460/1176   run_id 1930    4.0s  elapsed  38.7 min  eta  60.1 min
+    470/1176   run_id 1940    4.0s  elapsed  39.3 min  eta  59.0 min
+    480/1176   run_id 1950    4.0s  elapsed  40.0 min  eta  57.9 min
+    490/1176   run_id 1960    3.8s  elapsed  40.7 min  eta  56.8 min
+    500/1176   run_id 2117    4.8s  elapsed  41.3 min  eta  55.8 min
+    510/1176   run_id 2127    3.9s  elapsed  42.1 min  eta  54.8 min
+    520/1176   run_id 2137    4.0s  elapsed  42.7 min  eta  53.8 min
+    530/1176   run_id 2147    3.9s  elapsed  43.4 min  eta  52.8 min
+    540/1176   run_id 2304    3.8s  elapsed  44.0 min  eta  51.7 min
+    550/1176   run_id 2314    3.8s  elapsed  44.6 min  eta  50.7 min
+    560/1176   run_id 2324    3.8s  elapsed  45.3 min  eta  49.7 min
+    570/1176   run_id 2334    3.8s  elapsed  45.9 min  eta  48.7 min
+    580/1176   run_id 2344    3.7s  elapsed  46.5 min  eta  47.7 min
+    590/1176   run_id 2501    3.9s  elapsed  47.2 min  eta  46.8 min
+    600/1176   run_id 2511    3.8s  elapsed  47.8 min  eta  45.8 min
+    610/1176   run_id 2521    3.9s  elapsed  48.4 min  eta  44.9 min
+    620/1176   run_id 2531    3.8s  elapsed  49.1 min  eta  43.9 min
+    630/1176   run_id 2541    3.8s  elapsed  49.7 min  eta  43.0 min
+    640/1176   run_id 2698    3.8s  elapsed  50.4 min  eta  42.1 min
+    650/1176   run_id 2708    3.8s  elapsed  51.0 min  eta  41.2 min
+    660/1176   run_id 2718    3.8s  elapsed  51.6 min  eta  40.3 min
+    670/1176   run_id 2728    3.7s  elapsed  52.3 min  eta  39.4 min
+    680/1176   run_id 2738    3.9s  elapsed  52.9 min  eta  38.5 min
+    690/1176   run_id 2895    3.8s  elapsed  53.5 min  eta  37.6 min
+    700/1176   run_id 2905    3.8s  elapsed  54.2 min  eta  36.8 min
+    710/1176   run_id 2915    3.8s  elapsed  54.8 min  eta  35.9 min
+    720/1176   run_id 2925    3.9s  elapsed  55.4 min  eta  35.1 min
+    730/1176   run_id 2935    3.9s  elapsed  56.1 min  eta  34.2 min
+    740/1176   run_id 3092    3.9s  elapsed  56.7 min  eta  33.4 min
+    750/1176   run_id 3102    5.9s  elapsed  57.8 min  eta  32.8 min
+    760/1176   run_id 3112    6.0s  elapsed  58.9 min  eta  32.2 min
+    770/1176   run_id 3122    5.1s  elapsed  60.0 min  eta  31.6 min
+    780/1176   run_id 3132    4.0s  elapsed  60.6 min  eta  30.7 min
+    790/1176   run_id 3289    3.9s  elapsed  61.2 min  eta  29.9 min
+    800/1176   run_id 3299    3.7s  elapsed  61.9 min  eta  29.0 min
+    810/1176   run_id 3309    3.7s  elapsed  62.5 min  eta  28.2 min
+    820/1176   run_id 3319    3.8s  elapsed  63.2 min  eta  27.4 min
+    830/1176   run_id 3329    3.8s  elapsed  63.8 min  eta  26.6 min
+    840/1176   run_id 3486    3.7s  elapsed  64.4 min  eta  25.7 min
+    850/1176   run_id 3496    3.6s  elapsed  65.1 min  eta  24.9 min
+    860/1176   run_id 3506    3.8s  elapsed  65.7 min  eta  24.1 min
+    870/1176   run_id 3516    3.9s  elapsed  66.3 min  eta  23.3 min
+    880/1176   run_id 3526    3.7s  elapsed  67.0 min  eta  22.5 min
+    890/1176   run_id 3683    3.9s  elapsed  67.6 min  eta  21.7 min
+    900/1176   run_id 3693    3.8s  elapsed  68.2 min  eta  20.9 min
+    910/1176   run_id 3703    3.9s  elapsed  68.9 min  eta  20.1 min
+    920/1176   run_id 3713    3.7s  elapsed  69.5 min  eta  19.3 min
+    930/1176   run_id 3723    3.7s  elapsed  70.1 min  eta  18.5 min
+    940/1176   run_id 3880    3.6s  elapsed  70.8 min  eta  17.7 min
+    950/1176   run_id 3890    3.8s  elapsed  71.4 min  eta  17.0 min
+    960/1176   run_id 3900    3.8s  elapsed  72.0 min  eta  16.2 min
+    970/1176   run_id 3910    3.9s  elapsed  72.7 min  eta  15.4 min
+    980/1176   run_id 3920    3.8s  elapsed  73.3 min  eta  14.6 min
+    990/1176   run_id 4077    3.7s  elapsed  73.9 min  eta  13.9 min
+   1000/1176   run_id 4087    3.8s  elapsed  74.5 min  eta  13.1 min
+   1010/1176   run_id 4097    3.6s  elapsed  75.4 min  eta  12.4 min
+   1020/1176   run_id 4107    3.7s  elapsed  76.0 min  eta  11.6 min
+   1030/1176   run_id 4264    3.7s  elapsed  76.6 min  eta  10.8 min
+   1040/1176   run_id 4274    3.7s  elapsed  77.2 min  eta  10.1 min
+   1050/1176   run_id 4284    3.8s  elapsed  77.8 min  eta   9.3 min
+   1060/1176   run_id 4294    3.7s  elapsed  78.5 min  eta   8.6 min
+   1070/1176   run_id 4304    3.6s  elapsed  79.1 min  eta   7.8 min
+   1080/1176   run_id 4461    3.6s  elapsed  79.7 min  eta   7.1 min
+   1090/1176   run_id 4471    3.8s  elapsed  80.3 min  eta   6.3 min
+   1100/1176   run_id 4481    3.7s  elapsed  81.0 min  eta   5.6 min
+   1110/1176   run_id 4491    3.9s  elapsed  81.6 min  eta   4.8 min
+   1120/1176   run_id 4501    3.7s  elapsed  82.2 min  eta   4.1 min
+   1130/1176   run_id 4658    3.7s  elapsed  82.8 min  eta   3.4 min
+   1140/1176   run_id 4668    3.9s  elapsed  83.4 min  eta   2.6 min
+   1150/1176   run_id 4678    3.7s  elapsed  84.1 min  eta   1.9 min
+   1160/1176   run_id 4688    3.6s  elapsed  84.7 min  eta   1.2 min
+   1170/1176   run_id 4698    3.8s  elapsed  85.3 min  eta   0.4 min
+   1176/1176   run_id 4704    4.0s  elapsed  85.7 min  eta   0.0 min
+
+worker 4 finished 1176 runs in 85.7 min (mean 4.4 s/run)
