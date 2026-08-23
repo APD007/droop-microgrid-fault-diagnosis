@@ -1,0 +1,32 @@
+project root: C:\Users\prasa\Projects\droop-microgrid-fault-diagnosis
+added scripts/ and model/ to the MATLAB path
+=== worker 1 of 4 ===
+    assigned 147 runs, 0 already done, 147 to do
+    accelerator cache: C:\Users\prasa\Projects\droop-microgrid-fault-diagnosis\cache_w1
+[Warning: Cannot find library called 'dspstat3'.  To use this library, install <a href="matlab:matlab.internal.addons.launchers.showExplorer('AO_MODEL_RP','identifier','DS')">DSP
+System Toolbox</a>.] 
+[> In powergui
+In powergui
+In powergui
+In Simulink.Simulation.internal.DesktopSimHelper
+In Simulink.Simulation.internal.DesktopSimHelper.sim
+In Simulink/SimulationInput/sim
+In run_sweep (line 100)] 
+      1/147    run_id 1      31.8s  elapsed   0.5 min  eta  77.5 min
+     10/147    run_id 10      3.9s  elapsed   1.2 min  eta  15.7 min
+     20/147    run_id 20      4.0s  elapsed   1.9 min  eta  12.0 min
+     30/147    run_id 30      3.9s  elapsed   2.6 min  eta  10.0 min
+     40/147    run_id 40      4.0s  elapsed   3.2 min  eta   8.6 min
+     50/147    run_id 197     4.1s  elapsed   3.9 min  eta   7.5 min
+     60/147    run_id 207     3.9s  elapsed   4.6 min  eta   6.6 min
+     70/147    run_id 217     4.9s  elapsed   5.3 min  eta   5.8 min
+     80/147    run_id 227     4.1s  elapsed   6.2 min  eta   5.2 min
+     90/147    run_id 237     4.0s  elapsed   6.8 min  eta   4.3 min
+    100/147    run_id 394     4.2s  elapsed   7.5 min  eta   3.5 min
+    110/147    run_id 404     4.3s  elapsed   8.2 min  eta   2.8 min
+    120/147    run_id 414     4.9s  elapsed   9.1 min  eta   2.0 min
+    130/147    run_id 424     4.3s  elapsed   9.8 min  eta   1.3 min
+    140/147    run_id 434     3.8s  elapsed  10.5 min  eta   0.5 min
+    147/147    run_id 441     4.1s  elapsed  11.0 min  eta   0.0 min
+
+worker 1 finished 147 runs in 11.0 min (mean 4.5 s/run)

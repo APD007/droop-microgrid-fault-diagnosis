@@ -1,4 +1,4 @@
-function run_sweep(worker, nworkers, maxRuns)
+function run_sweep(worker, nworkers, maxRuns, tag)
 %RUN_SWEEP  Execute a slice of the 4704-run sweep.
 %
 %   run_sweep()                  run everything in this process
@@ -28,16 +28,17 @@ function run_sweep(worker, nworkers, maxRuns)
 if nargin < 1 || isempty(worker),   worker   = 1;   end
 if nargin < 2 || isempty(nworkers), nworkers = 1;   end
 if nargin < 3,                      maxRuns  = inf; end
+if nargin < 4 || isempty(tag),      tag      = '';  end   % '' = main sweep
 
 root      = project_root();
 MDL       = 'Droop_control_conditioning_claude';
 NCYC      = 4;                                  % RMS window, cycles
 PER_LOAD  = 49;                                 % PWM states per load setting
-OUTFILE   = fullfile(root, 'data', 'raw', sprintf('sweep_part%d.csv', worker));
-ERRFILE   = fullfile(root, 'logs', sprintf('sweep_errors_%d.log', worker));
+OUTFILE   = fullfile(root, 'data', 'raw', sprintf('sweep%s_part%d.csv', tag, worker));
+ERRFILE   = fullfile(root, 'logs', sprintf('sweep%s_errors_%d.log', tag, worker));
 
 %% ---- which runs belong to this worker --------------------------------
-R = readtable(fullfile(root, 'data', 'run_list.csv'));
+R = readtable(fullfile(root, 'data', sprintf('run_list%s.csv', tag)));
 loadIdx = floor((R.run_id - 1) / PER_LOAD);
 mine    = find(mod(loadIdx, nworkers) == worker - 1);
 
@@ -70,7 +71,7 @@ end
 % one slprj folder can collide while building or reading the target; the
 % cost of isolating them is one extra build per worker, about 40 s.
 if nworkers > 1
-    cf = fullfile(root, sprintf('cache_w%d', worker));
+    cf = fullfile(root, sprintf('cache_w%d', worker));   % shared across tags
     if ~isfolder(cf), mkdir(cf); end
     Simulink.fileGenControl('set', 'CacheFolder', cf, 'CodeGenFolder', cf);
     fprintf('    accelerator cache: %s\n', cf);

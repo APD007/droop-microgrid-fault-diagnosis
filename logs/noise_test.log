@@ -1,0 +1,14 @@
+4704 rows, train 3528 / test 1176, whole load settings held out
+
+   noise   --- train clean, test noisy ---      --- train noisy, test noisy ---  
+           49-state     R_a MAE     R_c MAE    49-state     R_a MAE     R_c MAE
+   0.0 %     94.39 %      0.000 oh      0.000 oh     94.39 %      0.000 oh      0.000 oh
+   0.1 %     94.64 %      0.000 oh      0.000 oh     94.22 %      0.000 oh      0.000 oh
+   0.5 %     94.73 %      0.000 oh      0.000 oh     94.47 %      0.000 oh      0.000 oh
+   1.0 %     94.22 %      0.000 oh      0.000 oh     94.22 %      0.137 oh      0.017 oh
+   2.0 %     94.05 %      0.170 oh      0.075 oh     93.71 %      1.942 oh      1.370 oh
+   5.0 %     91.67 %      1.653 oh      1.190 oh     90.56 %      5.608 oh      3.059 oh
+
+wrote results\noise_robustness.csv
+
+fault accuracy stays within 5 points of clean across every level tested, up to 5 %

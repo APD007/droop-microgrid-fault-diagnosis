@@ -63,7 +63,10 @@ FEATURES_PHYS = ["Z1_a", "Z1_b", "Z1_c", "Z2_a", "Z2_b", "Z2_c",
 FEATURES_FUND = ([f"{s}f_{p}" for s in ("V1", "I1", "V2", "I2") for p in "abc"]
                  + [f"{s}ang_{p}" for s in ("V1", "I1", "V2", "I2") for p in "abc"])
 
-R_BANK_C = 160.0        # bank C sits on DG2's bus and is never varied
+R_BANK_C     = 160.0    # bank C sits on DG2's bus and is never varied
+RC_COUPLING  = 0.03     # per-inverter coupling resistance, ohm
+LC_COUPLING  = 0.35e-3  # per-inverter coupling inductance, H
+F_NOM        = 50.0     # droop moves f by ~0.03 %, negligible inside Zc
 
 TEST_FRACTION = 0.25
 SEED = 20260823
@@ -104,12 +107,24 @@ def prepare(df):
         df[f"Z1_{ph}"] = df[f"V1_{ph}"] / (df[f"I1_{ph}"] + eps)
         df[f"Z2_{ph}"] = df[f"V2_{ph}"] / (df[f"I2_{ph}"] + eps)
         if have_phasors:
-            # exact: currents summed as phasors, which is the only way that
-            # holds once a fault puts them out of phase with each other
+            # Exact recovery of bank A. Three things make it work:
+            #   phasors, not magnitudes - two currents are being summed, and
+            #     under fault they are not in phase with each other
+            #   fundamental, not true RMS - the load is linear, so I = V/R
+            #     holds exactly at the fundamental however distorted the
+            #     total waveform is
+            #   step back through the coupling impedance - V1 and V2 are
+            #     measured at each filter-capacitor bus, but the load banks
+            #     hang off the buses on the far side of Rc + jwLc. Ignoring
+            #     that drop costs a factor of 35 in accuracy (median error
+            #     0.039 ohm against 0.0011 ohm).
             cx = lambda s: (df[f"{s}f_{ph}"]
                             * np.exp(1j * np.deg2rad(df[f"{s}ang_{ph}"])))
-            i_bankA = cx("I1") + cx("I2") - cx("V2") / R_BANK_C
-            df[f"Rest_{ph}"] = (cx("V1") / (i_bankA + eps)).abs()
+            V1, I1, V2, I2 = cx("V1"), cx("I1"), cx("V2"), cx("I2")
+            Zc = RC_COUPLING + 1j * 2 * np.pi * F_NOM * LC_COUPLING
+            Vbus1, Vbus2 = V1 - I1 * Zc, V2 - I2 * Zc
+            i_bankA = I1 + I2 - Vbus2 / R_BANK_C
+            df[f"Rest_{ph}"] = (Vbus1 / (i_bankA + eps)).abs()
         else:
             i_bankA = (df[f"I1_{ph}"] + df[f"I2_{ph}"]
                        - df[f"V2_{ph}"] / R_BANK_C)

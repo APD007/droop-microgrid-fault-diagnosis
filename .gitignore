@@ -22,3 +22,10 @@ desktop.ini
 
 # Excel lock files
 ~$*.xlsx
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Scratch working files
+scratch/

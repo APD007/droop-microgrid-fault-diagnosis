@@ -37,7 +37,18 @@ dataset is complete and validated.
 │   ├── make_run_list.py        writes data/run_list.csv
 │   ├── merge_results.py        worker files -> dataset, validated
 │   ├── make_pilot_xlsx.py      pilot results -> Excel
-│   └── train_model.py          stage 2: the fault-diagnosis model
+│   ├── features.py             SHARED feature definitions and derivation
+│   ├── train_model.py          compares feature sets on a held-out split
+│   ├── train_final.py          trains the shipped model on all rows
+│   ├── predict.py              >>> run the model on new data <<<
+│   ├── features_from_logs.m    Simulink run -> the CSV predict.py wants
+│   ├── make_offlattice_list.py held-out validation at unseen resistances
+│   ├── noise_test.py           accuracy against measurement noise
+│   └── make_figures.py         report figures
+│
+├── models/
+│   ├── fault_diagnosis.joblib  the trained model, ready to run
+│   └── manifest.json           what it expects, and how it was built
 │
 ├── data/
 │   ├── run_list.csv            4704 runs: the plan (inputs filled, outputs blank)
@@ -48,8 +59,8 @@ dataset is complete and validated.
 │
 ├── pilot/                      pilot_results.csv/.xlsx, waveforms, log
 ├── docs/                       Microgrid_Dataset_Schema.xlsx
-├── results/                    model metrics
-└── logs/                       sweep_w1..4.log
+├── results/                    metrics.json, noise_robustness.csv, figures/
+└── logs/                       sweep and noise-test logs
 ```
 
 `slprj/`, `cache_w*/` and `*.slxc` are Simulink build caches. They regenerate
@@ -98,11 +109,49 @@ Finally:
 python scripts/merge_results.py    # merge, validate, write the three data files
 ```
 
-## Stage 2 — the fault-diagnosis model
+## Testing the model on new data
+
+This is the handover path. Two steps.
+
+**In MATLAB** — run the model at whatever conditions you want to test, and
+write out the measurements:
+
+```matlab
+setup_paths
+in = Simulink.SimulationInput('Droop_control_conditioning_claude');
+in = in.setVariable('R_A_a', 40);            % any values, on or off lattice
+in = in.setVariable('R_A_b', 40);
+in = in.setVariable('R_A_c', 72);
+in = in.setVariable('F1', [1 1 0 1 1 1]);    % DG1 pulse 3 open
+in = in.setVariable('F2', [1 1 1 1 1 1]);    % DG2 healthy
+out = sim(in);
+features_from_logs(out, 'my_test.csv');
+```
+
+**Then, in the shell:**
 
 ```bash
-python scripts/train_model.py                        # dataset_extended.csv
-python scripts/train_model.py data/dataset.csv       # 28-column schema only
+python scripts/predict.py my_test.csv
+```
+
+Out comes `my_test_predictions.csv` with the twelve PWM flags, `R_a/R_b/R_c`,
+the degree of unbalance, and a confidence for each fault call. If the input
+already carries the true answers, `predict.py` scores itself against them and
+prints the result.
+
+Several runs can be batched: pass an array of `SimulationOutput` objects to
+`features_from_logs`, and every row lands in the same CSV.
+
+`predict.py` refuses input it cannot use rather than producing a plausible
+wrong answer — it names the missing columns and stops.
+
+## Stage 2 — training
+
+```bash
+python scripts/train_model.py data/dataset_full.csv   # compare feature sets
+python scripts/train_final.py                         # train + save the model
+python scripts/noise_test.py                          # robustness sweep
+python scripts/make_figures.py                        # report figures
 ```
 
 **Input:** `Vabc` and `Iabc` at both buses — twelve RMS values.
@@ -117,8 +166,25 @@ that structurally: it cannot predict two open pulses on one inverter, which
 twelve independent flags would happily do. The twelve 1/0 flags are
 reconstructed from the predicted class for reporting.
 
-*Load head* — regression on `R_a`, `R_b`, `R_c`, plus the degree of unbalance
-derived from them (NEMA-style: maximum deviation from the mean, as a percent).
+*Load head* — **analytic, not learned.** `R = V1 / (I1 + I2 − V2/160)` per
+phase, every term a fundamental phasor, with `V1` and `V2` first stepped back
+through the coupling impedance. The degree of unbalance is then derived from
+the three resistances (NEMA: maximum deviation from the mean, as a percent).
+
+A random forest was trained on the same targets and is kept in the model
+bundle, but it is **not** what `predict.py` returns. A forest predicts by
+averaging training leaf values, so it can only ever output resistances near
+ones it has seen. Measured on 588 runs at resistances never trained on:
+
+| | MAE | worst |
+|---|---|---|
+| analytic | **0.003 Ω** | 0.06 Ω |
+| random forest | 3.4 Ω | 8.0 Ω |
+
+The forest returns its nearest trained level — a true 72 Ω comes back as
+exactly 64.000, a true 88 Ω as exactly 96.000. The analytic head returns
+71.995 and 87.992. This is the single most important thing to understand
+about the load head, and it is why the model can be tested at any resistance.
 
 **The split matters more than the model.** Every load setting appears 49 times,
 once per PWM state. A random row split would put 49 near-identical siblings of
