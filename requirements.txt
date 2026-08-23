@@ -1,0 +1,17 @@
+# Python environment for the fault-diagnosis model.
+#
+# The venv deliberately lives OUTSIDE the project folder, because the project
+# sits in OneDrive and a venv is ~20k small files that OneDrive would sync
+# continuously (and lock, which has already bitten us here).
+#
+#   Create:    python -m venv C:\Users\prasa\venvs\microgrid
+#   Activate:  C:\Users\prasa\venvs\microgrid\Scripts\activate      (PowerShell)
+#              source /c/Users/prasa/venvs/microgrid/Scripts/activate  (bash)
+#   Install:   pip install -r requirements.txt
+
+numpy==2.5.2
+pandas==3.0.5
+scikit-learn==1.9.0
+matplotlib==3.11.1
+joblib==1.5.3
+openpyxl==3.1.5

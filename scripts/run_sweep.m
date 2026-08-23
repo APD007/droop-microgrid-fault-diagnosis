@@ -29,14 +29,15 @@ if nargin < 1 || isempty(worker),   worker   = 1;   end
 if nargin < 2 || isempty(nworkers), nworkers = 1;   end
 if nargin < 3,                      maxRuns  = inf; end
 
+root      = project_root();
 MDL       = 'Droop_control_conditioning_claude';
 NCYC      = 4;                                  % RMS window, cycles
 PER_LOAD  = 49;                                 % PWM states per load setting
-OUTFILE   = sprintf('sweep_part%d.csv', worker);
-ERRFILE   = sprintf('sweep_errors_%d.log', worker);
+OUTFILE   = fullfile(root, 'data', 'raw', sprintf('sweep_part%d.csv', worker));
+ERRFILE   = fullfile(root, 'logs', sprintf('sweep_errors_%d.log', worker));
 
 %% ---- which runs belong to this worker --------------------------------
-R = readtable('run_list.csv');
+R = readtable(fullfile(root, 'data', 'run_list.csv'));
 loadIdx = floor((R.run_id - 1) / PER_LOAD);
 mine    = find(mod(loadIdx, nworkers) == worker - 1);
 
@@ -69,13 +70,13 @@ end
 % one slprj folder can collide while building or reading the target; the
 % cost of isolating them is one extra build per worker, about 40 s.
 if nworkers > 1
-    cf = fullfile(pwd, sprintf('cache_w%d', worker));
+    cf = fullfile(root, sprintf('cache_w%d', worker));
     if ~isfolder(cf), mkdir(cf); end
     Simulink.fileGenControl('set', 'CacheFolder', cf, 'CodeGenFolder', cf);
     fprintf('    accelerator cache: %s\n', cf);
 end
 
-load_system(MDL);
+load_system(fullfile(root, 'model', [MDL '.slx']));
 t_start = tic;
 times   = [];
 
@@ -140,10 +141,12 @@ c = [{'run_id','R_a','R_b','R_c'}, ...
 end
 
 function n = featureNames()
-%FEATURENAMES  order must match featureVector exactly.
+%FEATURENAMES  order must match extract_features exactly.
+%   true RMS | DC offset | fundamental magnitude | fundamental angle
 p = {'a','b','c'};
 n = {};
-for base = {'V1','I1','V2','I2','I1mean','I2mean'}
+for base = {'V1','I1','V2','I2', 'I1mean','I2mean', ...
+            'V1f','I1f','V2f','I2f', 'V1ang','I1ang','V2ang','I2ang'}
     for k = 1:3, n{end+1} = [base{1} '_' p{k}]; end %#ok<AGROW>
 end
 n = [n, {'f1','f2','P1','P2','Q1','Q2'}];

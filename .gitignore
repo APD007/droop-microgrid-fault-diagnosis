@@ -7,12 +7,13 @@ cache_w*/
 *.slx.r20*
 *.slx.original
 
-# Transient copies at the project root while a sweep is in flight.
-# These are root-anchored, so the real ones under data/, data/raw/ and logs/
-# are still tracked once the sweep finishes and they move there.
-/sweep_part*.csv
-/sweep_w*.log
-/run_list.csv
+# Superseded partial sweep from the first feature schema (true RMS + DC offset,
+# no fundamental phasors). Kept locally as insurance until the current sweep
+# completes, then deleted. Never part of the deliverable.
+data/raw_v1/
+
+# Scratch
+data/.partial.csv
 
 # OS noise
 Thumbs.db

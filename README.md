@@ -20,6 +20,7 @@ dataset is complete and validated.
 ```
 .
 ├── setup_paths.m           run this first in MATLAB, once per session
+├── requirements.txt        pinned Python dependencies
 ├── README.md
 │
 ├── model/
@@ -35,7 +36,8 @@ dataset is complete and validated.
 │   ├── verify_rebuild.m        checks a rebuild did not move the numbers
 │   ├── make_run_list.py        writes data/run_list.csv
 │   ├── merge_results.py        worker files -> dataset, validated
-│   └── make_pilot_xlsx.py      pilot results -> Excel
+│   ├── make_pilot_xlsx.py      pilot results -> Excel
+│   └── train_model.py          stage 2: the fault-diagnosis model
 │
 ├── data/
 │   ├── run_list.csv            4704 runs: the plan (inputs filled, outputs blank)
@@ -46,11 +48,29 @@ dataset is complete and validated.
 │
 ├── pilot/                      pilot_results.csv/.xlsx, waveforms, log
 ├── docs/                       Microgrid_Dataset_Schema.xlsx
+├── results/                    model metrics
 └── logs/                       sweep_w1..4.log
 ```
 
 `slprj/`, `cache_w*/` and `*.slxc` are Simulink build caches. They regenerate
 automatically and can be deleted at any time.
+
+The project deliberately lives outside OneDrive. OneDrive syncing a folder
+that four MATLAB processes append to every few seconds caused repeated file
+locks, and a venv inside it would be ~20k files syncing continuously.
+
+## Python environment
+
+The venv also lives outside the project, for the same reason:
+
+```bash
+python -m venv C:\Users\prasa\venvs\microgrid
+C:\Users\prasa\venvs\microgrid\Scripts\activate      # PowerShell
+pip install -r requirements.txt
+```
+
+Nothing is installed into the system Python — activate the venv before running
+any of the `.py` scripts.
 
 ## How to run it
 
@@ -77,6 +97,37 @@ Finally:
 ```bash
 python scripts/merge_results.py    # merge, validate, write the three data files
 ```
+
+## Stage 2 — the fault-diagnosis model
+
+```bash
+python scripts/train_model.py                        # dataset_extended.csv
+python scripts/train_model.py data/dataset.csv       # 28-column schema only
+```
+
+**Input:** `Vabc` and `Iabc` at both buses — twelve RMS values.
+**Output:** which PWM pulse is open, and the per-phase load resistances.
+
+Two heads on the same features:
+
+*Fault head* — formulated as **two 7-class problems** (per inverter: healthy,
+or one of pulses 1–6) rather than twelve independent binary flags. The rule is
+that at most one pulse is open per inverter, and a 7-class formulation encodes
+that structurally: it cannot predict two open pulses on one inverter, which
+twelve independent flags would happily do. The twelve 1/0 flags are
+reconstructed from the predicted class for reporting.
+
+*Load head* — regression on `R_a`, `R_b`, `R_c`, plus the degree of unbalance
+derived from them (NEMA-style: maximum deviation from the mean, as a percent).
+
+**The split matters more than the model.** Every load setting appears 49 times,
+once per PWM state. A random row split would put 49 near-identical siblings of
+every test row into training and report accuracy that is almost pure leakage.
+Rows are grouped by load setting and whole groups are held out, so the test set
+contains load conditions never seen during training.
+
+The script trains on both feature sets and prints the difference, which turns
+the open question below into a measured result rather than an argument.
 
 ## Design decisions worth knowing
 
