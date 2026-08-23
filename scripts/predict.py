@@ -46,6 +46,45 @@ ROOT = Path(__file__).resolve().parent.parent
 MODEL = ROOT / "models" / "fault_diagnosis.joblib"
 
 
+def read_any(path):
+    """Read .xlsx / .xls / .csv alike - the sender should not have to care."""
+    if path.suffix.lower() in (".xlsx", ".xlsm", ".xls"):
+        return pd.read_excel(path)
+    return pd.read_csv(path)
+
+
+def normalise_columns(df):
+    """Map cosmetic naming differences onto the canonical column names.
+
+    A spreadsheet prepared by hand is likely to say 'V1 a' or 'v1_A' or
+    'V1_a (V)' rather than exactly 'V1_a'. Matching on a squashed key -
+    lowercase, alphanumerics only - accepts all of those without accepting
+    anything genuinely ambiguous.
+    """
+    def key(s):
+        return "".join(ch for ch in str(s).lower() if ch.isalnum())
+
+    canonical = {key(c): c for c in F.REQUIRED_INPUT}
+    renames, claimed = {}, set()
+    for col in df.columns:
+        k = key(col)
+        if col in F.REQUIRED_INPUT or k not in canonical:
+            continue
+        target = canonical[k]
+        if target in df.columns or target in claimed:
+            continue
+        renames[col] = target
+        claimed.add(target)
+
+    if renames:
+        shown = list(renames.items())[:4]
+        print("  matched column names: "
+              + ", ".join(f"{a!r}->{b!r}" for a, b in shown)
+              + (f" (+{len(renames)-4} more)" if len(renames) > 4 else ""))
+        df = df.rename(columns=renames)
+    return df
+
+
 def main():
     ap = argparse.ArgumentParser(description="Predict fault state and load "
                                              "resistances from measurements.")
@@ -65,7 +104,8 @@ def main():
         sys.exit(f"no such file: {src}")
 
     bundle = joblib.load(model_path)
-    df = pd.read_csv(src)
+    df = read_any(src)
+    df = normalise_columns(df)
 
     # fail loudly and specifically rather than predicting from bad input.
     # A traceback is the wrong output for a handover script - say what is
