@@ -38,11 +38,25 @@ dataset is complete and validated.
 │   ├── merge_results.py        worker files -> dataset, validated
 │   ├── make_pilot_xlsx.py      pilot results -> Excel
 │   ├── features.py             SHARED feature definitions and derivation
+│   ├── fundamental_rms.m       fundamental-component extraction helper
+│   │
+│   │   -- the model --
 │   ├── train_model.py          compares feature sets on a held-out split
 │   ├── train_final.py          trains the shipped model on all rows
 │   ├── predict.py              >>> run the model on new data <<<
-│   ├── features_from_logs.m    Simulink run -> the CSV predict.py wants
+│   │
+│   │   -- getting data in --
+│   ├── features_from_logs.m       Simulink run -> the CSV predict.py wants
+│   ├── features_from_waveforms.py sampled waveforms -> the same, no MATLAB
+│   ├── make_input_template.py     builds docs/model_input_template.xlsx
+│   │
+│   │   -- checking it --
+│   ├── verify_dataset.py       ten physical checks over every row
+│   ├── verify_row.m            re-simulate one row, compare all 42 features
+│   ├── verify_rebuild.m        checks a rebuild did not move the numbers
+│   ├── validate_fundamental.m  why phasors, not magnitudes (the evidence)
 │   ├── make_offlattice_list.py held-out validation at unseen resistances
+│   ├── eval_offlattice.py      scores the model on those unseen resistances
 │   ├── noise_test.py           accuracy against measurement noise
 │   └── make_figures.py         report figures
 │
@@ -153,6 +167,39 @@ python scripts/train_final.py                         # train + save the model
 python scripts/noise_test.py                          # robustness sweep
 python scripts/make_figures.py                        # report figures
 ```
+
+## Checking the data is right
+
+Nothing here has to be taken on trust.
+
+```bash
+python scripts/verify_dataset.py     # ten physical checks over all 4704 rows
+python scripts/eval_offlattice.py    # score at resistances never trained on
+```
+
+```matlab
+verify_row(1324)    % re-simulate one row and compare all 42 features
+```
+
+`verify_dataset.py` tests laws the numbers must obey regardless of how they
+were produced — Kirchhoff, Ohm, Parseval, the DC offsets summing to zero,
+class balance, and the pulse→leg mapping. A bug anywhere in the pipeline shows
+up as a violation rather than hiding. All ten currently pass.
+
+`verify_row` is the definitive check: it re-runs the model at a row's recorded
+conditions and compares every feature. On `run_id 8` the worst relative
+difference is 3.4e-10.
+
+**If you do it by hand**, clear the swept variables first:
+
+```matlab
+clear R_A_a R_A_b R_A_c F1 F2
+```
+
+The `InitFcn` is guarded with `~exist` so that values pushed in from outside
+survive it — that is what makes the sweep work, and it also means a leftover
+variable is silently reused. Set `R_A_a = 16`, run, then try the default 32 Ω
+case and you still get 16 Ω, with no warning.
 
 **Input:** `Vabc` and `Iabc` at both buses — twelve RMS values.
 **Output:** which PWM pulse is open, and the per-phase load resistances.
