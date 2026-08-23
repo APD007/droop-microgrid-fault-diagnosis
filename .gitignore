@@ -1,0 +1,23 @@
+# MATLAB / Simulink build caches - regenerated automatically, never edited
+slprj/
+cache_w*/
+*.slxc
+*.asv
+*.autosave
+*.slx.r20*
+*.slx.original
+
+# Transient copies at the project root while a sweep is in flight.
+# These are root-anchored, so the real ones under data/, data/raw/ and logs/
+# are still tracked once the sweep finishes and they move there.
+/sweep_part*.csv
+/sweep_w*.log
+/run_list.csv
+
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Excel lock files
+~$*.xlsx

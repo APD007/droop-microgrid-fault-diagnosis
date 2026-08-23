@@ -1,0 +1,69 @@
+=== pilot: 15 runs ===
+
+[Warning: Cannot find library called 'dspstat3'.  To use this library, install <a href="matlab:matlab.internal.addons.launchers.showExplorer('AO_MODEL_RP','identifier','DS')">DSP
+System Toolbox</a>.] 
+[> In powergui
+In powergui
+In powergui
+In Simulink.Simulation.internal.DesktopSimHelper
+In Simulink.Simulation.internal.DesktopSimHelper.sim
+In Simulink/SimulationInput/sim
+In run_pilot (line 56)] 
+ 1/15  healthy, balanced 32               19.2s
+ 2/15  DG1 pulse 1 open                    6.4s
+ 3/15  DG1 pulse 2 open                    6.0s
+ 4/15  DG1 pulse 3 open                    6.0s
+ 5/15  DG1 pulse 4 open                    6.4s
+ 6/15  DG1 pulse 5 open                    6.0s
+ 7/15  DG1 pulse 6 open                    6.0s
+ 8/15  DG2 pulse 1 open                    6.0s
+ 9/15  DG2 pulse 2 open                    6.1s
+10/15  DG2 pulse 3 open                    6.0s
+11/15  DG2 pulse 4 open                    5.9s
+12/15  DG2 pulse 5 open                    5.9s
+13/15  DG2 pulse 6 open                    6.0s
+14/15  healthy, balanced 64  [GUARD]       6.0s
+15/15  healthy, a=16 unbal   [GUARD]       7.4s
+
+
+================= PILOT REPORT =================
+
+runs completed: 15 / 15
+
+--- Q1: does setVariable reach the model? ---
+  case  1  R=[32 32 32]  I1 =   4.309   4.307   4.312
+  case 14  R=[64 64 64]  I1 =   2.521   2.507   2.516
+  case 15  R=[16 32 32]  I1 =   7.057   4.227   4.919
+  PASS: load changes move the current (1.788 A and 2.748 A).
+        case 15 should also break phase symmetry - check above.
+
+--- Q2/Q3: fault signature and pulse -> IGBT mapping ---
+  For the faulted inverter, per phase: mean current, and the ratio
+  of positive-half RMS to negative-half RMS.
+  ratio >> 1 => negative half suppressed => LOWER switch open
+  ratio << 1 => positive half suppressed => UPPER switch open
+
+  case                   mean I (a,b,c)           pos/neg RMS ratio (a,b,c)
+  healthy, balanced 32     0.001  -0.006   0.006      1.00    1.00    1.01
+  DG1 pulse 1 open        -1.521   6.956  -5.435      0.82   15.75    0.33
+  DG1 pulse 2 open         1.527  -6.908   5.381      1.23    0.07    3.03
+  DG1 pulse 3 open        -5.412  -1.527   6.939      0.33    0.82   14.92
+  DG1 pulse 4 open         5.401   1.528  -6.929      3.06    1.23    0.06
+  DG1 pulse 5 open         6.922  -5.399  -1.524     15.29    0.33    0.82
+  DG1 pulse 6 open        -6.944   5.417   1.527      0.07    3.05    1.23
+  DG2 pulse 1 open        -1.534   7.183  -5.649      0.82   13.69    0.32
+  DG2 pulse 2 open         1.537  -7.204   5.667      1.22    0.07    3.12
+  DG2 pulse 3 open        -5.648  -1.536   7.185      0.32    0.82   13.89
+  DG2 pulse 4 open         5.677   1.535  -7.213      3.13    1.22    0.07
+  DG2 pulse 5 open         7.197  -5.655  -1.542     14.45    0.32    0.82
+  DG2 pulse 6 open        -7.201   5.666   1.535      0.07    3.13    1.22
+
+--- Q4: are the 13 states separable on RMS alone? ---
+  closest pair: case 5 (DG1 pulse 4 open)
+           and case 4 (DG1 pulse 3 open)
+  euclidean distance between their 12 RMS features: 0.0277
+  as a fraction of the healthy feature magnitude:   4.92e-05
+  *** WARNING: two states are nearly identical on RMS features.
+  *** 49 classes may not be separable. Review before sweeping.
+
+===============================================
