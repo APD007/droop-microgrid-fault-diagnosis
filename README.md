@@ -1,8 +1,19 @@
-# Droop-controlled microgrid — dataset generation
+# Droop-controlled microgrid — fault diagnosis
 
-Simulink model of two parallel droop-controlled inverters in an islanded
-microgrid, swept over load and open-switch-fault permutations to generate a
-dataset for machine learning.
+B.Tech final-year project, electrical engineering.
+
+Two parallel droop-controlled inverters in an islanded microgrid, simulated in
+Simulink. The project has two stages:
+
+1. **Dataset generation** — sweep the model over every permitted permutation of
+   load unbalance and open-switch (IGBT) fault, and reduce each run to a row of
+   RMS measurements. 4704 runs.
+2. **Fault diagnosis model** — train a model to recover the fault state (which
+   pulse is open, on which inverter) and the per-phase load resistances from
+   the measured voltages and currents alone.
+
+Stage 1 is what this repository currently contains. Stage 2 begins once the
+dataset is complete and validated.
 
 ## Layout
 
