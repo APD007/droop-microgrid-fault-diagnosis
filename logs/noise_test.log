@@ -1,13 +1,13 @@
-4704 rows, train 3528 / test 1176, whole load settings held out
+10584 rows, train 7938 / test 2646, whole load settings held out
 
    noise   --- train clean, test noisy ---      --- train noisy, test noisy ---  
            49-state     R_a MAE     R_c MAE    49-state     R_a MAE     R_c MAE
-   0.0 %     94.39 %      0.000 oh      0.000 oh     94.39 %      0.000 oh      0.000 oh
-   0.1 %     94.64 %      0.000 oh      0.000 oh     94.22 %      0.000 oh      0.000 oh
-   0.5 %     94.73 %      0.000 oh      0.000 oh     94.47 %      0.000 oh      0.000 oh
-   1.0 %     94.22 %      0.000 oh      0.000 oh     94.22 %      0.137 oh      0.017 oh
-   2.0 %     94.05 %      0.170 oh      0.075 oh     93.71 %      1.942 oh      1.370 oh
-   5.0 %     91.67 %      1.653 oh      1.190 oh     90.56 %      5.608 oh      3.059 oh
+   0.0 %     96.67 %      0.000 oh      0.000 oh     96.67 %      0.000 oh      0.000 oh
+   0.1 %     96.79 %      0.000 oh      0.000 oh     96.56 %      0.000 oh      0.000 oh
+   0.5 %     96.33 %      0.000 oh      0.000 oh     96.33 %      0.000 oh      0.000 oh
+   1.0 %     96.03 %      0.000 oh      0.012 oh     95.62 %      0.000 oh      0.014 oh
+   2.0 %     95.20 %      0.209 oh      0.206 oh     95.65 %      0.287 oh      0.282 oh
+   5.0 %     93.24 %      1.832 oh      2.089 oh     92.97 %      2.427 oh      2.761 oh
 
 wrote results\noise_robustness.csv
 

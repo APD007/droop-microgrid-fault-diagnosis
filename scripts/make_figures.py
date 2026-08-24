@@ -171,8 +171,10 @@ def fig_importance(df, groups):
 
 
 def fig_featuresets():
+    # measured by train_model.py on data/dataset_full.csv, grouped split,
+    # 49-combined-state accuracy. Update together with results/metrics.json.
     sets = ["12 true RMS\nonly", "+ 6 DC\noffsets", "+ 24 fundamental\nphasors"]
-    vals = [46.43, 91.50, 94.90]
+    vals = [51.47, 95.62, 96.67]
     fig, ax = plt.subplots(figsize=(5.2, 3.6))
     bars = ax.bar(sets, vals, width=.55, color=[CAT[0], CAT[0], CAT[0]])
     bars[2].set_color(CAT[2])

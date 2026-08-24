@@ -1,13 +1,13 @@
 {
   "meta": {
-    "trained_utc": "2026-08-23T11:50:01+00:00",
+    "trained_utc": "2026-08-24T21:52:39+00:00",
     "dataset": "dataset_full.csv",
-    "n_rows": 4704,
-    "n_load_settings": 96,
+    "n_rows": 10584,
+    "n_load_settings": 216,
     "n_trees": 400,
     "seed": 20260823,
     "sklearn": "1.9.0",
-    "git_commit": "4a22d09",
+    "git_commit": "89b22f9",
     "note": "Trained on the full dataset. The FAULT head is what ships. The R_a/R_b/R_c regressors are kept for comparison only - predict.py returns the analytic estimate instead, because a forest can only return resistances near ones it has seen. Measured on 588 runs at resistances never trained on: analytic MAE 0.003 ohm, forest MAE 3.4 ohm, the forest snapping to its nearest trained level. Fault head on those same unseen conditions: 98.8 % on the 49 combined states."
   },
   "required_input": [

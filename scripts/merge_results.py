@@ -19,7 +19,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-N_EXPECTED = 4704
+# 216 load settings x 49 PWM states, once the 'all three phases different'
+# combinations were added to the original 96
+N_EXPECTED = 10584
 
 SCHEMA_28 = (["run_id", "R_a", "R_b", "R_c"]
              + [f"DG1_PWM{i}" for i in range(1, 7)]
@@ -47,7 +49,8 @@ RANGES = {
 
 
 def load():
-    parts = sorted(glob.glob(str(ROOT / "data" / "raw" / "sweep_part*.csv")))
+    parts = (sorted(glob.glob(str(ROOT / "data" / "raw" / "sweep_part*.csv")))
+             + sorted(glob.glob(str(ROOT / "data" / "raw" / "sweep_extra_part*.csv"))))
     if not parts:
         sys.exit("no sweep_part*.csv in data/raw - has the sweep run?")
     rows = {}
