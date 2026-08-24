@@ -7,13 +7,14 @@ Simulink. The project has two stages:
 
 1. **Dataset generation** — sweep the model over every permitted permutation of
    load unbalance and open-switch (IGBT) fault, and reduce each run to a row of
-   RMS measurements. 4704 runs.
+   RMS measurements. 10,584 runs.
 2. **Fault diagnosis model** — train a model to recover the fault state (which
    pulse is open, on which inverter) and the per-phase load resistances from
    the measured voltages and currents alone.
 
-Stage 1 is what this repository currently contains. Stage 2 begins once the
-dataset is complete and validated.
+Both stages are complete. The dataset passes ten independent physical checks;
+the model scores 96.8 % on the 49 combined fault states with load settings it
+has never seen, and recovers the load resistances to 0.003 Ω.
 
 ## Layout
 
@@ -32,7 +33,7 @@ dataset is complete and validated.
 │   ├── build_sweep_model.m     builds the working copy from the untouched one
 │   ├── extract_features.m      waveforms -> scalar features (RMS window)
 │   ├── run_pilot.m             15 diagnostic runs
-│   ├── run_sweep.m             one slice of the 4704-run sweep
+│   ├── run_sweep.m             one slice of the 10,584-run sweep
 │   ├── verify_rebuild.m        checks a rebuild did not move the numbers
 │   ├── make_run_list.py        writes data/run_list.csv
 │   ├── merge_results.py        worker files -> dataset, validated
@@ -53,7 +54,6 @@ dataset is complete and validated.
 │   │   -- checking it --
 │   ├── verify_dataset.py       ten physical checks over every row
 │   ├── verify_row.m            re-simulate one row, compare all 42 features
-│   ├── verify_rebuild.m        checks a rebuild did not move the numbers
 │   ├── validate_fundamental.m  why phasors, not magnitudes (the evidence)
 │   ├── make_offlattice_list.py held-out validation at unseen resistances
 │   ├── eval_offlattice.py      scores the model on those unseen resistances
@@ -65,14 +65,18 @@ dataset is complete and validated.
 │   └── manifest.json           what it expects, and how it was built
 │
 ├── data/
-│   ├── run_list.csv            4704 runs: the plan (inputs filled, outputs blank)
-│   ├── raw/                    sweep_part1..4.csv, one per worker
-│   ├── dataset.csv             28 columns, the schema as fixed by the guide
+│   ├── run_list.csv            the original 96-setting plan
+│   ├── run_list_extra.csv      the 120 settings that widened it to 216
+│   ├── run_list_offlattice.csv 12 settings at resistances never trained on
+│   ├── raw/                    sweep_part1..4 + sweep_extra_part1..4, per worker
+│   ├── dataset.csv             28 columns, the schema as originally fixed
 │   ├── dataset_extended.csv    34 columns, adds the 6 DC-offset features
+│   ├── dataset_full.csv        58 columns, everything  <-- the one to use
+│   ├── dataset_offlattice.csv  588 held-out validation rows
 │   └── diagnostics.csv         per-run health record
 │
 ├── pilot/                      pilot_results.csv/.xlsx, waveforms, log
-├── docs/                       Microgrid_Dataset_Schema.xlsx
+├── docs/                       schema workbook + model_input_template.xlsx
 ├── results/                    metrics.json, noise_robustness.csv, figures/
 └── logs/                       sweep and noise-test logs
 ```
@@ -80,9 +84,14 @@ dataset is complete and validated.
 `slprj/`, `cache_w*/` and `*.slxc` are Simulink build caches. They regenerate
 automatically and can be deleted at any time.
 
-The project deliberately lives outside OneDrive. OneDrive syncing a folder
-that four MATLAB processes append to every few seconds caused repeated file
-locks, and a venv inside it would be ~20k files syncing continuously.
+**If you run a sweep, pause OneDrive sync first.** The project lives on the
+OneDrive Desktop, and OneDrive tries to upload the four CSVs that the workers
+append to after every run, plus the Simulink caches. Measured cost: 15.4 s per
+run with sync live against 6.1 s with it paused, and it caused file locks
+earlier. Pause from the tray icon, run the sweep, resume afterwards.
+
+The Python venv lives outside the project for the same reason — it is ~20k
+files that would sync continuously.
 
 ## Python environment
 
@@ -106,13 +115,22 @@ any of the `.py` scripts.
 ```
 
 ```bash
-python scripts/make_run_list.py     # regenerate the run list (deterministic)
+python scripts/make_run_list.py       # the original 96 settings
+python scripts/make_run_list_full.py  # the 120 that complete the 6^3 factorial
 ```
 
 Then the sweep, one of these in each of four MATLAB windows:
 
 ```matlab
 >> run_sweep(1,4)   >> run_sweep(2,4)   >> run_sweep(3,4)   >> run_sweep(4,4)
+```
+
+`run_sweep` takes an optional fourth argument naming a run list, so the
+extension and validation sweeps reuse the same worker:
+
+```matlab
+>> run_sweep(1,4,inf,'_extra')        % reads run_list_extra.csv
+>> run_sweep(1,4,inf,'_offlattice')   % reads run_list_offlattice.csv
 ```
 
 Each worker writes its own file and flushes every row before the next
@@ -173,7 +191,7 @@ python scripts/make_figures.py                        # report figures
 Nothing here has to be taken on trust.
 
 ```bash
-python scripts/verify_dataset.py     # ten physical checks over all 4704 rows
+python scripts/verify_dataset.py     # ten physical checks over all 10,584 rows
 python scripts/eval_offlattice.py    # score at resistances never trained on
 ```
 
@@ -226,7 +244,7 @@ ones it has seen. Measured on 588 runs at resistances never trained on:
 | | MAE | worst |
 |---|---|---|
 | analytic | **0.003 Ω** | 0.06 Ω |
-| random forest | 3.4 Ω | 8.0 Ω |
+| random forest | 3.7 Ω | 8.0 Ω |
 
 The forest returns its nearest trained level — a true 72 Ω comes back as
 exactly 64.000, a true 88 Ω as exactly 96.000. The analytic head returns
@@ -244,18 +262,26 @@ the open question below into a measured result rather than an argument.
 
 ## Design decisions worth knowing
 
-**Two permitted variations only.** Per-phase load resistance (balanced, or
-unbalanced by changing one or two phases) and open-switch faults (at most one
-open pulse per inverter, the two inverters independent). That gives 96 load
-settings × 49 PWM states = **4704 runs**, with all 49 fault classes exactly
-balanced at 96 runs each.
+**Two variations, enumerated completely.** Per-phase load resistance and
+open-switch faults (at most one open pulse per inverter, the two inverters
+independent). Each phase takes any of six levels `{16, 24, 32, 48, 64, 96} Ω`
+independently, so the load axis is the full factorial 6³ = **216 settings** ×
+49 PWM states = **10,584 runs**, with all 49 fault classes exactly balanced at
+216 runs each.
+
+The first sweep used a narrower rule — balanced, or one or two phases moved
+away from a 32 Ω base — giving 96 settings and 4704 runs. That restriction was
+dropped and the missing 120 settings simulated; the original 96 are a subset,
+so only the new ones were run. Widening it raised fault accuracy from 94.9 % to
+96.8 %, and the added cases are the hardest: with all three phases different
+there is no reference phase for the model to lean on.
 
 **Only load bank A is varied.** Banks A and B sit on DG1's bus, bank C on
 DG2's. Bank B is behind a breaker that closes at t=1 s, and runs stop at
 0.4 s, so bank B never participates.
 
 **The `InitFcn` is guarded.** It re-runs at every simulation start and would
-otherwise overwrite anything set by `setVariable`, silently producing 4704
+otherwise overwrite anything set by `setVariable`, silently producing 10,584
 identical rows. The pilot verifies the guard works before any sweep runs.
 
 **Scopes are commented out in the working copy.** 39 Scope/Display blocks cost
