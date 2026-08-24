@@ -84,27 +84,23 @@ has never seen, and recovers the load resistances to 0.003 Ω.
 `slprj/`, `cache_w*/` and `*.slxc` are Simulink build caches. They regenerate
 automatically and can be deleted at any time.
 
-**If you run a sweep, pause OneDrive sync first.** The project lives on the
-OneDrive Desktop, and OneDrive tries to upload the four CSVs that the workers
-append to after every run, plus the Simulink caches. Measured cost: 15.4 s per
-run with sync live against 6.1 s with it paused, and it caused file locks
-earlier. Pause from the tray icon, run the sweep, resume afterwards.
-
-The Python venv lives outside the project for the same reason — it is ~20k
-files that would sync continuously.
+If the project folder is inside a cloud-sync directory, pause syncing before
+running a sweep — four workers appending to CSVs after every run gives a
+sync client a great deal to do, and it slows the sweep measurably.
 
 ## Python environment
 
 The venv also lives outside the project, for the same reason:
 
 ```bash
-python -m venv C:\Users\prasa\venvs\microgrid
-C:\Users\prasa\venvs\microgrid\Scripts\activate      # PowerShell
+python -m venv .venv
+.venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 ```
 
 Nothing is installed into the system Python — activate the venv before running
-any of the `.py` scripts.
+any of the `.py` scripts. Keep the venv out of any cloud-synced folder; it is
+roughly 20,000 files.
 
 ## How to run it
 
